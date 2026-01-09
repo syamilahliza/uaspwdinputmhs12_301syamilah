@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <style>
+        .table-container {
+            padding: 20px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+        }
+        
+        table th {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        
+        table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        
+        table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        table tr:hover {
+            background-color: #e8e8e8;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-style: italic;
+        }
+        
+        .btn-hapus {
+            background-color: #f44336;
+            color: white;
+            padding: 5px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .btn-hapus:hover {
+            background-color: #da190b;
+        }
+        
+        .btn-refresh {
+            background-color: #2196F3;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        
+        .btn-refresh:hover {
+            background-color: #0b7dda;
+        }
+    </style>
+    <script>
+        function tampilkanData() {
+            // PERBAIKAN: Gunakan sessionStorage (sama dengan content.html)
+            var dataMahasiswa = JSON.parse(sessionStorage.getItem('dataMahasiswa') || '[]');
+            var tableBody = document.getElementById('tableBody');
+            
+            if (dataMahasiswa.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="no-data">Belum ada data mahasiswa</td></tr>';
+                return;
+            }
+            
+            var html = '';
+            for (var i = 0; i < dataMahasiswa.length; i++) {
+                html += '<tr>';
+                html += '<td>' + (i + 1) + '</td>';
+                html += '<td>' + dataMahasiswa[i].npm + '</td>';
+                html += '<td>' + dataMahasiswa[i].nama + '</td>';
+                html += '<td>' + dataMahasiswa[i].alamat + '</td>';
+                html += '<td><button class="btn-hapus" onclick="hapusData(' + i + ')">Hapus</button></td>';
+                html += '</tr>';
+            }
+            
+            tableBody.innerHTML = html;
+        }
+        
+        function hapusData(index) {
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                var dataMahasiswa = JSON.parse(sessionStorage.getItem('dataMahasiswa') || '[]');
+                dataMahasiswa.splice(index, 1);
+                sessionStorage.setItem('dataMahasiswa', JSON.stringify(dataMahasiswa));
+                tampilkanData();
+            }
+        }
+        
+        function refreshData() {
+            tampilkanData();
+        }
+        
+        // Load data saat halaman dibuka
+        window.onload = function() {
+            tampilkanData();
+        };
+        
+        // Listen untuk update dari content.html
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'updateData') {
+                sessionStorage.setItem('dataMahasiswa', JSON.stringify(event.data.data));
+                tampilkanData();
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="content">
+        <h2>Tampil Data Mahasiswa</h2>
+        <button class="btn-refresh" onclick="refreshData()">🔄 Refresh Data</button>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">No</th>
+                        <th style="width: 150px;">NPM</th>
+                        <th style="width: 200px;">Nama</th>
+                        <th>Alamat</th>
+                        <th style="width: 100px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="5" class="no-data">Memuat data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

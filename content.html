@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css" type="text/css">
+    <script>
+        function simpanData(event) {
+            event.preventDefault();
+            
+            // Ambil data dari form
+            var npm = document.getElementById('npm').value;
+            var nama = document.getElementById('nama').value;
+            var alamat = document.getElementById('alamat').value;
+            
+            // Validasi data
+            if (npm === '' || nama === '' || alamat === '') {
+                alert('Semua field harus diisi!');
+                return false;
+            }
+            
+            // Gunakan sessionStorage sebagai alternatif
+            var dataMahasiswa = JSON.parse(sessionStorage.getItem('dataMahasiswa') || '[]');
+            
+            // Tambah data baru
+            dataMahasiswa.push({
+                npm: npm,
+                nama: nama,
+                alamat: alamat,
+                tanggal: new Date().toLocaleString('id-ID')
+            });
+            
+            // Simpan ke sessionStorage
+            sessionStorage.setItem('dataMahasiswa', JSON.stringify(dataMahasiswa));
+            
+            // Kirim pesan ke parent window untuk sinkronisasi
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'updateData',
+                    data: dataMahasiswa
+                }, '*');
+            }
+            
+            // Tampilkan pesan sukses
+            alert('Data berhasil disimpan!');
+            
+            // Reset form
+            document.getElementById('formMahasiswa').reset();
+            
+            return false;
+        }
+    </script>
+</head>
+<body>
+    <div class="content">
+        <h2>Input Data Mahasiswa</h2>
+        <form id="formMahasiswa" onsubmit="return simpanData(event)">
+            <div class="form-group">
+                <label for="npm">NPM</label>
+                <input type="text" id="npm" name="npm" placeholder="Masukkan NPM" required>
+            </div>
+            <div class="form-group">
+                <label for="nama">Nama</label>
+                <input type="text" id="nama" name="nama" placeholder="Masukkan Nama" required>
+            </div>
+            <div class="form-group">
+                <label for="alamat">Alamat</label>
+                <textarea id="alamat" name="alamat" placeholder="Masukkan Alamat" required></textarea>
+            </div>
+            <button type="submit" class="submit-button">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
